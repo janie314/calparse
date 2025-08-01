@@ -14,11 +14,11 @@ def parse(mode, urls_path):
         cal += events(url, sort=True)
     if mode == "random":
         e = random.choice(cal)
-        print(e.start.strftime("%m/%d %I:%M %p") + " " + e.summary)
+        print(e.start.strftime("%m/%d %-I:%M %p") + " " + e.summary)
     elif mode == "list":
         cal = sorted(cal, key=lambda e: e.start)
         for e in cal:
-            print(e.start.strftime("%m/%d %I:%M %p") + " " + e.summary)
+            print(e.start.strftime("%m/%d %-I:%M %p") + " " + e.summary)
     else:
         print_exception("bad mode....")
 
