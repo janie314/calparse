@@ -1,9 +1,10 @@
-from traceback import print_exception
-from icalevents.icalevents import events
 import argparse
 import json
 import os
 import random
+from traceback import print_exception
+
+from icalevents.icalevents import events
 
 
 def parse(mode, urls_path):
