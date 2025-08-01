@@ -23,6 +23,11 @@ def parse(mode, urls_path):
         cal = sorted(cal, key=lambda e: e.start)
         for e in cal:
             print(e.start.strftime("%-m/%-d %I:%M %p") + " " + e.summary)
+    elif mode == "sequence":
+        cal = sorted(cal, key=lambda e: e.start)
+        minutes = datetime.now().minute
+        e = cal[minutes % len(cal)]
+        print(e.start.strftime("%-m/%-d %I:%M %p") + " " + e.summary)
     else:
         print_exception("bad mode....")
 
