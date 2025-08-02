@@ -12,7 +12,7 @@ from icalevents.icalevents import events
 
 
 def display_str(event):
-    return event.start.strftime("%-m/%-d %I:%M %p") + " " + event.summary
+    return event.start.strftime("%a %-m/%-d %I:%M %p") + " " + event.summary
 
 
 def load_cal(urls_path, cache_path, cache_timeout):
