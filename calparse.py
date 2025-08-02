@@ -13,7 +13,14 @@ def display_str(event):
     return event.start.strftime("%-m/%-d %I:%M %p") + " " + event.summary
 
 
-def pull_and_display(mode, urls_path, cache_path):
+def load_cal(urls_path, cache_path, cache_timeout):
+    if os.path.exists(cache_path):
+        last_modified = os.path.getmtime(cache_path)
+        age = datetime.now().timestamp() - last_modified
+        if age < float(cache_timeout):
+            with open(cache_path) as cache:
+                return json.load(cache)
+    # else
     cal = {}
     with open(urls_path) as f:
         urls = json.load(f)
@@ -24,6 +31,11 @@ def pull_and_display(mode, urls_path, cache_path):
             cal[e.start.isoformat() + str(uuid.uuid4())] = display_str(e)
     with open(cache_path, "w") as cache:
         json.dump(cal, cache)
+    return cal
+
+
+def pull_and_display(mode, urls_path, cache_path, cache_timeout):
+    cal = load_cal(urls_path, cache_path, cache_timeout)
     print_result(mode, cal)
 
 
@@ -59,5 +71,11 @@ if __name__ == "__main__":
         help="cache file of calendar state (default $HOME/.cache/calparse-cache.json)",
         default=os.path.join(homedir, ".cache/calparse-cache.json"),
     )
+    argparser.add_argument(
+        "--cache_timeout",
+        help="length of time the cache is good for (seconds, default: 3600)",
+        default=3600,
+    )
+
     args = argparser.parse_args()
-    pull_and_display(args.mode.lower(), args.urls, args.cache)
+    pull_and_display(args.mode.lower(), args.urls, args.cache, args.cache_timeout)
