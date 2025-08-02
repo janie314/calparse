@@ -1,7 +1,9 @@
 import argparse
 import json
+import math
 import os
 import random
+import time
 import uuid
 from datetime import datetime, timedelta
 from traceback import print_exception
@@ -34,12 +36,12 @@ def load_cal(urls_path, cache_path, cache_timeout):
     return cal
 
 
-def pull_and_display(mode, urls_path, cache_path, cache_timeout):
+def pull_and_display(mode, urls_path, cache_path, cache_timeout, interval):
     cal = load_cal(urls_path, cache_path, cache_timeout)
-    print_result(mode, cal)
+    print_result(mode, cal, interval)
 
 
-def print_result(mode, cal):
+def print_result(mode, cal, interval):
     vals = [cal[k] for k in sorted(cal.keys())]
     if mode == "random":
         print(random.choice(vals))
@@ -47,8 +49,8 @@ def print_result(mode, cal):
         for e in sorted(cal.values()):
             print(e)
     elif mode == "sequence":
-        minutes = datetime.now().minute
-        print(vals[minutes % len(vals)])
+        unix = math.floor(time.time() / interval)
+        print(vals[unix % len(vals)])
     else:
         print_exception("bad mode....")
 
@@ -76,6 +78,13 @@ if __name__ == "__main__":
         help="length of time the cache is good for (seconds, default: 3600)",
         default=3600,
     )
-
+    argparser.add_argument(
+        "-i",
+        "--interval",
+        help="number of seconds in an interval for the 'sequence' mode ",
+        default=30,
+    )
     args = argparser.parse_args()
-    pull_and_display(args.mode.lower(), args.urls, args.cache, args.cache_timeout)
+    pull_and_display(
+        args.mode.lower(), args.urls, args.cache, args.cache_timeout, args.interval
+    )
