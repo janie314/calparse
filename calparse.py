@@ -46,7 +46,7 @@ def print_result(mode, cal, interval):
     if mode == "random":
         print(random.choice(vals))
     elif mode == "list":
-        for e in sorted(cal.values()):
+        for e in vals:
             print(e)
     elif mode == "sequence":
         unix = math.floor(time.time() / interval)
