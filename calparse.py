@@ -7,6 +7,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from traceback import print_exception
+from tzlocal import get_localzone
 
 from icalevents.icalevents import events
 
@@ -26,11 +27,12 @@ def load_cal(urls_path, cache_path, cache_timeout):
     cal = {}
     with open(urls_path) as f:
         urls = json.load(f)
-    start_date = datetime.now()
-    end_date = start_date + timedelta(weeks=1)
+    start_date = datetime.now(get_localzone())
+    end_date = start_date + timedelta(days=8)
     for url in urls:
         for e in events(url, sort=True, start=start_date, end=end_date):
-            cal[e.start.isoformat() + str(uuid.uuid4())] = display_str(e)
+            if e.end >= start_date:
+                cal[e.start.isoformat() + str(uuid.uuid4())] = display_str(e)
     with open(cache_path, "w") as cache:
         json.dump(cal, cache)
     return cal
