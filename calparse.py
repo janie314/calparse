@@ -7,9 +7,9 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from traceback import print_exception
-from tzlocal import get_localzone
 
 from icalevents.icalevents import events
+from tzlocal import get_localzone
 
 
 def display_str(event):
