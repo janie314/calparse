@@ -17,7 +17,8 @@ def display_str(event):
 
 
 def load_cal(urls_path, cache_path, cache_timeout):
-    if os.path.exists(cache_path):
+    # The force flag will be handled by passing cache_timeout=0
+    if os.path.exists(cache_path) and float(cache_timeout) > 0:
         last_modified = os.path.getmtime(cache_path)
         age = datetime.now().timestamp() - last_modified
         if age < float(cache_timeout):
@@ -86,7 +87,14 @@ if __name__ == "__main__":
         help="number of seconds in an interval for the 'sequence' mode ",
         default=30,
     )
+    argparser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="force update of the cache, overriding cache_timeout",
+    )
     args = argparser.parse_args()
+    cache_timeout = 0 if args.force else args.cache_timeout
     pull_and_display(
-        args.mode.lower(), args.urls, args.cache, args.cache_timeout, args.interval
+        args.mode.lower(), args.urls, args.cache, cache_timeout, args.interval
     )
