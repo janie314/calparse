@@ -32,7 +32,22 @@ def load_cal(urls_path, cache_path, cache_timeout):
     end_date = start_date + timedelta(days=8)
     for url in urls:
         for e in events(url, sort=True, start=start_date, end=end_date):
-            if e.end >= start_date:
+            if e.end < start_date:
+                continue
+            # Check for not_until_days in description JSON
+            include_event = True
+            if e.description:
+                try:
+                    desc_json = json.loads(e.description)
+                    if isinstance(desc_json, dict) and "not_until_days" in desc_json:
+                        t = int(desc_json["not_until_days"])
+                        days_until = (e.start - datetime.now(get_localzone())).days
+                        print(days_until)
+                        if days_until >= t:
+                            include_event = False
+                except Exception:
+                    pass  # ignore if not valid JSON
+            if include_event:
                 cal[e.start.isoformat() + str(uuid.uuid4())] = display_str(e)
     with open(cache_path, "w") as cache:
         json.dump(cal, cache)
