@@ -38,13 +38,14 @@ def load_cal(urls_path, cache_path, cache_timeout):
             include_event = True
             if e.description:
                 try:
-                    desc_json = json.loads(e.description)
-                    if isinstance(desc_json, dict) and "not_until_days" in desc_json:
-                        t = int(desc_json["not_until_days"])
-                        days_until = (e.start - datetime.now(get_localzone())).days
-                        print(days_until)
-                        if days_until >= t:
-                            include_event = False
+                    # Remove unwanted HTML tags before parsing JSON
+                    desc_clean = e.description
+                    for tag in ["<span>", "</span>", "<br>", "</br>"]:
+                        desc_clean = desc_clean.replace(tag, "")
+                    desc_json = json.loads(desc_clean)
+                    days_until = (e.start - datetime.now(get_localzone())).days
+                    if days_until >= desc_json["not_until_days"]:
+                        include_event = False
                 except Exception:
                     pass  # ignore if not valid JSON
             if include_event:

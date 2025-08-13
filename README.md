@@ -1,5 +1,7 @@
 # calparse
 
+## Command-line usage
+
 ```
 usage: calparse [-h] [-u URLS] [-c CACHE] [--cache_timeout CACHE_TIMEOUT] [-i INTERVAL] [-f] mode
 
@@ -23,4 +25,15 @@ Here is an example `urls.json` file:
 
 ```json
 ["https://ics.calendarlabs.com/76/b7458267/US_Holidays.ics"]
+```
+
+## More functionality
+
+Add a description like the following to not display an event until 0 days before
+an event:
+
+```json
+{
+  "not_until_days": 0
+}
 ```
