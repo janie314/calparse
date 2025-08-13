@@ -109,7 +109,28 @@ if __name__ == "__main__":
         action="store_true",
         help="force update of the cache, overriding cache_timeout",
     )
+    argparser.add_argument(
+        "--version",
+        action="store_true",
+        help="print version information (latest git commit hash and date)",
+    )
     args = argparser.parse_args()
+    if args.version:
+        import subprocess
+
+        try:
+            version = (
+                subprocess.check_output(
+                    ["git", "log", "-1", "--format=%H,%ad", "--date=iso"],
+                    stderr=subprocess.DEVNULL,
+                )
+                .decode()
+                .strip()
+            )
+            print(version)
+        except Exception:
+            print("Version info not available.")
+        exit(0)
     cache_timeout = 0 if args.force else args.cache_timeout
     pull_and_display(
         args.mode.lower(), args.urls, args.cache, cache_timeout, args.interval
