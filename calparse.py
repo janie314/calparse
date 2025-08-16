@@ -1,103 +1,15 @@
 import argparse
-import json
-import math
 import os
-import random
-import time
-import uuid
-from datetime import datetime, timedelta
-from traceback import print_exception
 
-from icalevents.icalevents import events
-from tzlocal import get_localzone
-
-
-def display_str(event):
-    return event.start.strftime("%a %-m/%-d %I:%M %p") + " " + event.summary
-
-
-def load_cal(urls_path, cache_path, cache_timeout, no_skip=False):
-    # The force flag will be handled by passing cache_timeout=0
-    if os.path.exists(cache_path) and float(cache_timeout) > 0:
-        last_modified = os.path.getmtime(cache_path)
-        age = datetime.now().timestamp() - last_modified
-        if age < float(cache_timeout):
-            with open(cache_path) as cache:
-                cal = json.load(cache)
-            if no_skip:
-                return cal
-            # Filter events using not_until_days if present
-            now = datetime.now(get_localzone())
-            filtered = {}
-            for k, v in cal.items():
-                not_until_days = v.get("not_until_days")
-                # Parse event start from key (isoformat + uuid)
-                try:
-                    event_start = datetime.fromisoformat(k[: k.index("T") + 9])(
-                        get_localzone()
-                    )
-                except Exception:
-                    event_start = None
-                if not_until_days is not None and event_start is not None:
-                    days_until = (event_start - now).days
-                    if days_until >= not_until_days:
-                        continue
-                filtered[k] = v
-            return filtered
-    # else
-    cal = {}
-    with open(urls_path) as f:
-        urls = json.load(f)
-    start_date = datetime.now(get_localzone())
-    end_date = start_date + timedelta(days=8)
-    now = datetime.now(get_localzone())
-    for url in urls:
-        for e in events(url, sort=True, start=start_date, end=end_date):
-            print("F")
-            if e.end < start_date:
-                continue
-            not_until_days = None
-            if e.description:
-                try:
-                    desc_clean = e.description
-                    print("E", desc_clean)
-                    for tag in ["<span>", "</span>", "<br>", "</br>"]:
-                        desc_clean = desc_clean.replace(tag, "")
-                    desc_json = json.loads(desc_clean)
-                    if isinstance(desc_json, dict) and "not_until_days" in desc_json:
-                        not_until_days = int(desc_json["not_until_days"])
-                except Exception:
-                    pass
-            cal[e.start.isoformat() + str(uuid.uuid4())] = {
-                "display": display_str(e),
-                "not_until_days": not_until_days,
-            }
-    with open(cache_path, "w") as cache:
-        json.dump(cal, cache)
-    return cal
+from lib.cal import load_cal
+from lib.display import print_result
 
 
 def pull_and_display(
     mode, urls_path, cache_path, cache_timeout, interval, no_skip=False
 ):
     cal = load_cal(urls_path, cache_path, cache_timeout, no_skip)
-    print_result(mode, cal, interval)
-
-
-def print_result(mode, cal, interval):
-    vals = [cal[k]["display"] for k in sorted(cal.keys())]
-    if not vals:
-        return
-    if mode == "random":
-        print(random.choice(vals))
-    elif mode == "list":
-        for e in vals:
-            print(e)
-    elif mode == "sequence":
-        unix = math.floor(time.time() / interval)
-        print(vals[unix % len(vals)])
-    else:
-        print_exception("bad mode....")
+    print_result(mode, cal, interval, no_skip)
 
 
 if __name__ == "__main__":
