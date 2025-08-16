@@ -16,7 +16,7 @@ def display_str(event):
     return event.start.strftime("%a %-m/%-d %I:%M %p") + " " + event.summary
 
 
-def load_cal(urls_path, cache_path, cache_timeout):
+def load_cal(urls_path, cache_path, cache_timeout, no_skip=False):
     # The force flag will be handled by passing cache_timeout=0
     if os.path.exists(cache_path) and float(cache_timeout) > 0:
         last_modified = os.path.getmtime(cache_path)
@@ -24,6 +24,8 @@ def load_cal(urls_path, cache_path, cache_timeout):
         if age < float(cache_timeout):
             with open(cache_path) as cache:
                 cal = json.load(cache)
+            if no_skip:
+                return cal
             # Filter events using not_until_days if present
             now = datetime.now(get_localzone())
             filtered = {}
@@ -51,12 +53,14 @@ def load_cal(urls_path, cache_path, cache_timeout):
     now = datetime.now(get_localzone())
     for url in urls:
         for e in events(url, sort=True, start=start_date, end=end_date):
+            print("F")
             if e.end < start_date:
                 continue
             not_until_days = None
             if e.description:
                 try:
                     desc_clean = e.description
+                    print("E", desc_clean)
                     for tag in ["<span>", "</span>", "<br>", "</br>"]:
                         desc_clean = desc_clean.replace(tag, "")
                     desc_json = json.loads(desc_clean)
@@ -73,8 +77,10 @@ def load_cal(urls_path, cache_path, cache_timeout):
     return cal
 
 
-def pull_and_display(mode, urls_path, cache_path, cache_timeout, interval):
-    cal = load_cal(urls_path, cache_path, cache_timeout)
+def pull_and_display(
+    mode, urls_path, cache_path, cache_timeout, interval, no_skip=False
+):
+    cal = load_cal(urls_path, cache_path, cache_timeout, no_skip)
     print_result(mode, cal, interval)
 
 
@@ -134,6 +140,12 @@ if __name__ == "__main__":
         action="store_true",
         help="print version information (latest git commit hash and date)",
     )
+    argparser.add_argument(
+        "-n",
+        "--no-skip",
+        action="store_true",
+        help="do not skip any events despite not_until_days configuration",
+    )
     args = argparser.parse_args()
     if args.version:
         import subprocess
@@ -155,5 +167,10 @@ if __name__ == "__main__":
         argparser.error("the following arguments are required: mode")
     cache_timeout = 0 if args.force else args.cache_timeout
     pull_and_display(
-        args.mode.lower(), args.urls, args.cache, cache_timeout, args.interval
+        args.mode.lower(),
+        args.urls,
+        args.cache,
+        cache_timeout,
+        args.interval,
+        args.no_skip,
     )
