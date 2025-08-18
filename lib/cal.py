@@ -17,8 +17,7 @@ def load_cal(urls_path, cache_path, cache_timeout, no_skip=False):
         if age < float(cache_timeout):
             with open(cache_path) as cache:
                 return json.load(cache)
-    else:
-        return curl_cals(urls_path, cache_path)
+    return curl_cals(urls_path, cache_path)
 
 
 def curl_cals(urls_path, cache_path):
