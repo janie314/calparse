@@ -3,6 +3,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 
+import requests
 from icalevents.icalevents import events
 from tzlocal import get_localzone
 
@@ -17,8 +18,7 @@ def load_cal(urls_path, cache_path, cache_timeout, no_skip=False):
         if age < float(cache_timeout):
             with open(cache_path) as cache:
                 return json.load(cache)
-    else:
-        return curl_cals(urls_path, cache_path)
+    return curl_cals(urls_path, cache_path)
 
 
 def curl_cals(urls_path, cache_path):
@@ -29,7 +29,8 @@ def curl_cals(urls_path, cache_path):
     end_date = start_date + timedelta(days=8)
     datetime.now(get_localzone())
     for url in urls:
-        for e in events(url, sort=True, start=start_date, end=end_date):
+        res = requests.get(url).text
+        for e in events(string_content=res, sort=True, start=start_date, end=end_date):
             if e.end < start_date:
                 continue
             not_until_days = None
