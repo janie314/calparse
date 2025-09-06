@@ -5,7 +5,7 @@ description = "Parses iCal URLs in different ways"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "icalevents>=0.2.1",
+    "icalendar>=6.3.1",
     "requests>=2.32.4",
     "tzlocal>=5.3.1",
 ]

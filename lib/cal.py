@@ -3,8 +3,8 @@ import os
 import uuid
 from datetime import datetime, timedelta
 
+import icalendar
 import requests
-from icalevents.icalevents import events
 from tzlocal import get_localzone
 
 from lib.display import display_str
@@ -30,8 +30,11 @@ def curl_cals(urls_path, cache_path):
     datetime.now(get_localzone())
     for url in urls:
         res = requests.get(url).text
-        for e in events(string_content=res, sort=True, start=start_date, end=end_date):
-            if e.end < start_date:
+        calendar = icalendar.Calendar.from_ical(res)
+        for e in calendar.events:
+            if not (
+                (start_date <= e.start <= end_date) or (start_date <= e.end <= end_date)
+            ):
                 continue
             not_until_days = None
             if e.description:
