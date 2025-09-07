@@ -1,7 +1,7 @@
+import datetime
 import json
 import os
 import uuid
-from datetime import datetime, timedelta
 
 import icalendar
 import requests
@@ -25,28 +25,29 @@ def curl_cals(urls_path, cache_path):
     cal = {}
     with open(urls_path) as f:
         urls = json.load(f)
-    start_date = datetime.now(get_localzone())
-    end_date = start_date + timedelta(days=8)
-    datetime.now(get_localzone())
+    start_date = datetime.datetime.now(get_localzone())
+    end_date = start_date + datetime.timedelta(days=8)
     for url in urls:
         res = requests.get(url).text
         calendar = icalendar.Calendar.from_ical(res)
         for e in calendar.events:
+            # cast everything to a datetime.date
             if not (
-                (start_date <= e.start <= end_date) or (start_date <= e.end <= end_date)
+                (_cast(start_date) <= _cast(e.start) <= _cast(end_date))
+                or (_cast(start_date) <= _cast(e.end) <= _cast(end_date))
             ):
                 continue
+            # breakpoint()
             not_until_days = None
-            if e.description:
-                try:
-                    desc_clean = e.description
-                    for tag in ["<span>", "</span>", "<br>", "</br>"]:
-                        desc_clean = desc_clean.replace(tag, "")
-                    desc_json = json.loads(desc_clean)
-                    if isinstance(desc_json, dict) and "not_until_days" in desc_json:
-                        not_until_days = int(desc_json["not_until_days"])
-                except Exception:
-                    pass
+            desc_clean = str(e.get("SUMMARY"))
+            for tag in ["<span>", "</span>", "<br>", "</br>"]:
+                desc_clean = desc_clean.replace(tag, "")
+            try:
+                desc_json = json.loads(desc_clean)
+                if isinstance(desc_json, dict) and "not_until_days" in desc_json:
+                    not_until_days = int(desc_json["not_until_days"])
+            except Exception:
+                pass
             cal[e.start.isoformat() + str(uuid.uuid4())] = {
                 "start": e.start.isoformat(),
                 "display": display_str(e),
@@ -55,3 +56,9 @@ def curl_cals(urls_path, cache_path):
     with open(cache_path, "w") as cache:
         json.dump(cal, cache)
     return cal
+
+
+def _cast(d):
+    if isinstance(d, datetime.datetime):
+        return d.date()
+    return d
