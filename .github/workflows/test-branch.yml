@@ -29,3 +29,6 @@ jobs:
         uv run calparse.py list
         uv run calparse.py random -f
         uv run calparse.py random
+        rm -v "$HOME/.cache/calparse-cache.json"
+        uv run calparse.py sequence -f
+        uv run calparse.py sequence 

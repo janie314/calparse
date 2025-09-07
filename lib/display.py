@@ -7,7 +7,7 @@ from traceback import print_exception
 from tzlocal import get_localzone
 
 
-def filter(cal, no_skip):
+def _filter(cal, no_skip):
     if no_skip:
         return cal
     # Filter events using not_until_days if present
@@ -17,8 +17,8 @@ def filter(cal, no_skip):
         not_until_days = v.get("not_until_days")
         event_start = v.get("start")
         if not_until_days is not None and event_start is not None:
-            event_start = datetime.fromisoformat(event_start)
-            now = datetime.now(get_localzone())
+            event_start = datetime.datetime.fromisoformat(event_start)
+            now = datetime.datetime.now(get_localzone())
             days_until = (event_start - now).days
             if days_until > not_until_days:
                 continue
@@ -31,7 +31,7 @@ def display_str(event):
 
 
 def print_result(mode, cal, interval, no_skip):
-    cal = filter(cal, no_skip)
+    cal = _filter(cal, no_skip)
     vals = [cal[k]["display"] for k in sorted(cal.keys())]
     if not vals:
         return
