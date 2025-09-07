@@ -27,7 +27,7 @@ def filter(cal, no_skip):
 
 
 def display_str(event):
-    return event.start.strftime("%a %-m/%-d %I:%M %p") + " " + event.summary
+    return event.start.strftime("%a %-m/%-d %I:%M %p") + " " + str(event.get("SUMMARY"))
 
 
 def print_result(mode, cal, interval, no_skip):

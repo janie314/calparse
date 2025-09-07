@@ -1,5 +1,6 @@
 import argparse
 import os
+import subprocess
 
 from lib.cal import load_cal
 from lib.display import print_result
@@ -60,20 +61,15 @@ if __name__ == "__main__":
     )
     args = argparser.parse_args()
     if args.version:
-        import subprocess
-
-        try:
-            version = (
-                subprocess.check_output(
-                    ["git", "log", "-1", "--format=%H,%ad", "--date=iso"],
-                    stderr=subprocess.DEVNULL,
-                )
-                .decode()
-                .strip()
+        version = (
+            subprocess.check_output(
+                ["git", "log", "-1", "--format=%H,%ad", "--date=iso"],
+                stderr=subprocess.DEVNULL,
             )
-            print(version)
-        except Exception:
-            print("Version info not available.")
+            .decode()
+            .strip()
+        )
+        print(version)
         exit(0)
     if not args.mode:
         argparser.error("the following arguments are required: mode")
