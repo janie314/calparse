@@ -14,7 +14,7 @@ def load_cal(urls_path, cache_path, cache_timeout, no_skip=False):
     # The force flag will be handled by passing cache_timeout=0
     if os.path.exists(cache_path) and float(cache_timeout) > 0:
         last_modified = os.path.getmtime(cache_path)
-        age = datetime.now().timestamp() - last_modified
+        age = datetime.datetime.now().timestamp() - last_modified
         if age < float(cache_timeout):
             with open(cache_path) as cache:
                 return json.load(cache)
@@ -37,7 +37,6 @@ def curl_cals(urls_path, cache_path):
                 or (_cast(start_date) <= _cast(e.end) <= _cast(end_date))
             ):
                 continue
-            # breakpoint()
             not_until_days = None
             desc_clean = str(e.get("SUMMARY"))
             for tag in ["<span>", "</span>", "<br>", "</br>"]:

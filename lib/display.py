@@ -1,7 +1,7 @@
+import datetime
 import math
 import random
 import time
-from datetime import datetime
 from traceback import print_exception
 
 from tzlocal import get_localzone
@@ -11,7 +11,7 @@ def filter(cal, no_skip):
     if no_skip:
         return cal
     # Filter events using not_until_days if present
-    now = datetime.now(get_localzone())
+    now = datetime.datetime.now(get_localzone())
     filtered = {}
     for k, v in cal.items():
         not_until_days = v.get("not_until_days")
