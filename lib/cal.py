@@ -11,6 +11,8 @@ from lib.display import display_str
 
 
 def load_cal(urls_path, cache_path, cache_timeout, no_skip=False):
+    cache_dir = os.path.join(os.path.expanduser("~"), ".cache")
+    os.makedirs(cache_dir, exist_ok=True)
     # The force flag will be handled by passing cache_timeout=0
     if os.path.exists(cache_path) and float(cache_timeout) > 0:
         last_modified = os.path.getmtime(cache_path)
